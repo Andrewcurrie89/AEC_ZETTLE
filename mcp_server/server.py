@@ -226,8 +226,12 @@ def link_zettels(
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        api_key = request.headers.get("x-api-key", "")
         expected = os.environ.get("MCP_API_KEY", "")
+        api_key = (
+            request.headers.get("x-api-key")
+            or request.query_params.get("api_key")
+            or ""
+        )
         if not expected or api_key != expected:
             return Response("Unauthorized", status_code=401)
         return await call_next(request)
