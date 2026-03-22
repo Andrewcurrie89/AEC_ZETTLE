@@ -19,7 +19,9 @@
       "Bash(curl -si --max-time 10 https://zettelkasten-production-b528.up.railway.app/sse)",
       "Bash(curl:*)",
       "Bash(railway logs:*)",
-      "Bash(railway up:*)"
+      "Bash(railway up:*)",
+      "Bash(python -c \"from mcp.server.fastmcp import FastMCP; mcp = FastMCP\\(''test''\\); print\\([m for m in dir\\(mcp\\) if ''app'' in m.lower\\(\\) or ''middleware'' in m.lower\\(\\)]\\)\")",
+      "Bash(python3:*)"
     ]
   }
 }

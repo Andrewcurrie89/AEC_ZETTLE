@@ -1,3 +1,4 @@
 mcp[cli]
 supabase
 python-dotenv
+uvicorn
