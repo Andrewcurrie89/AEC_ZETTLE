@@ -2,8 +2,6 @@ import os
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from supabase import create_client, Client
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
 import uvicorn
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
@@ -224,20 +222,6 @@ def link_zettels(
 # Entry point
 # ---------------------------------------------------------------------------
 
-class APIKeyMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        expected = os.environ.get("MCP_API_KEY", "")
-        api_key = (
-            request.headers.get("x-api-key")
-            or request.query_params.get("api_key")
-            or ""
-        )
-        if not expected or api_key != expected:
-            return Response("Unauthorized", status_code=401)
-        return await call_next(request)
-
-
 if __name__ == "__main__":
     app = mcp.streamable_http_app()
-    app.add_middleware(APIKeyMiddleware)
     uvicorn.run(app, host="0.0.0.0", port=port)
