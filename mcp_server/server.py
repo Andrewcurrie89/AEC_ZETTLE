@@ -207,6 +207,37 @@ def list_recent(limit: int = 10) -> list:
 
 
 @mcp.tool()
+def batch_commit(entries: list[dict]) -> dict:
+    """
+    Save multiple zettel entries to the database in one call.
+
+    Each entry in the list should have the same fields as commit_zettel:
+      title (required), body, type, tags, metadata
+
+    Use this after drafting multiple entries and getting explicit user approval
+    for all of them. Present all drafts clearly before calling this tool.
+
+    Example entries:
+      [
+        {"title": "Idea A", "body": "...", "type": "idea", "tags": ["ai"]},
+        {"title": "Task X", "body": "...", "type": "todo", "metadata": {"status": "pending", "priority": "high"}}
+      ]
+    """
+    rows = [
+        {
+            "title": e["title"],
+            "body": e.get("body", ""),
+            "type": e.get("type", "note"),
+            "tags": e.get("tags", []),
+            "metadata": e.get("metadata", {}),
+        }
+        for e in entries
+    ]
+    result = supabase.table("zettels").insert(rows).execute()
+    return {"status": "saved", "count": len(result.data), "ids": [r["id"] for r in result.data]}
+
+
+@mcp.tool()
 def list_todos(status: str | None = None) -> list:
     """
     Return todo entries, optionally filtered by status.
