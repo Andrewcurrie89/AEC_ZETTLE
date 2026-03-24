@@ -12,6 +12,7 @@ supabase: Client = create_client(
 )
 
 port = int(os.environ.get("PORT", 8000))
+author = os.environ.get("AUTHOR_NAME", "unknown")
 mcp = FastMCP("zettelkasten", host="0.0.0.0", port=port)
 
 
@@ -71,6 +72,7 @@ def draft_zettel(
         "type": type,
         "tags": tags,
         "metadata": metadata,
+        "author": author,
     }
 
 
@@ -96,11 +98,11 @@ def commit_zettel(
     """
     result = (
         supabase.table("zettels")
-        .insert({"title": title, "body": body, "type": type, "tags": tags, "metadata": metadata})
+        .insert({"title": title, "body": body, "type": type, "tags": tags, "metadata": metadata, "author": author})
         .execute()
     )
     entry = result.data[0]
-    return {"status": "saved", "id": entry["id"], "title": entry["title"]}
+    return {"status": "saved", "id": entry["id"], "title": entry["title"], "author": entry["author"]}
 
 
 @mcp.tool()
@@ -173,7 +175,7 @@ def search_zettels(
     Search zettels. Supports full-text search (query), tag filtering, and type filtering.
     Returns id, title, type, tags, and a body snippet.
     """
-    q = supabase.table("zettels").select("id, title, type, tags, body, created_at")
+    q = supabase.table("zettels").select("id, title, type, tags, body, author, created_at")
 
     if query:
         q = q.text_search("fts", query)
@@ -198,7 +200,7 @@ def list_recent(limit: int = 10) -> list:
     """List the most recently created zettel entries."""
     result = (
         supabase.table("zettels")
-        .select("id, title, type, tags, created_at")
+        .select("id, title, type, tags, author, created_at")
         .order("created_at", desc=True)
         .limit(limit)
         .execute()
@@ -230,6 +232,7 @@ def batch_commit(entries: list[dict]) -> dict:
             "type": e.get("type", "note"),
             "tags": e.get("tags", []),
             "metadata": e.get("metadata", {}),
+            "author": author,
         }
         for e in entries
     ]
