@@ -142,6 +142,24 @@ def update_zettel(
 
 
 @mcp.tool()
+def delete_zettel(id: str) -> dict:
+    """
+    Permanently delete a zettel and all its links from the database.
+
+    IMPORTANT: This is irreversible. Always confirm with the user before calling this tool.
+    Show the zettel title (via get_zettel) and ask for explicit approval first.
+    """
+    # Remove all links where this zettel is source or target
+    supabase.table("zettel_links").delete().eq("source_id", id).execute()
+    supabase.table("zettel_links").delete().eq("target_id", id).execute()
+
+    result = supabase.table("zettels").delete().eq("id", id).execute()
+    if not result.data:
+        return {"status": "not_found"}
+    return {"status": "deleted", "id": id, "title": result.data[0]["title"]}
+
+
+@mcp.tool()
 def get_zettel(id: str) -> dict:
     """Fetch a single zettel by its UUID, including any linked zettels."""
     result = (
