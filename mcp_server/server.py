@@ -221,8 +221,9 @@ def search_zettels(
     if type:
         q = q.eq("type", type)
 
-    result = q.limit(limit).execute()
-    result.data.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    result = q.execute()
+    data = sorted(result.data or [], key=lambda x: x.get("created_at", ""), reverse=True)[:limit]
+    result.data = data
 
     # Trim body to a short snippet for readability
     entries = []
