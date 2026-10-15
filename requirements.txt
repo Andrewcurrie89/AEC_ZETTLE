@@ -1,4 +1,4 @@
-mcp[cli]
-supabase
+mcp[cli]>=1.6,<2
+supabase>=2,<3
 python-dotenv
 uvicorn
