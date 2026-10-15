@@ -426,4 +426,8 @@ def delete_attachment(attachment_id: str) -> dict:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    mcp.run(transport="sse")
+    # Serve streamable HTTP at /mcp (what claude.ai connectors use) and keep
+    # the legacy SSE endpoints at /sse and /messages/ for existing clients.
+    app = mcp.streamable_http_app()
+    app.router.routes.extend(mcp.sse_app().routes)
+    uvicorn.run(app, host="0.0.0.0", port=port)
